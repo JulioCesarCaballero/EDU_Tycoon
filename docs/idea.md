@@ -8,9 +8,10 @@
 > **Profesor Titular:** M. en C. Gabriel Hurtado Avila  
 > **Equipo:** Equipo EduTycoon ESCOM  
 > **Integrantes:**  
-> - Aragón Martínez Manuel  
+> - Velazquez Beltrán Brandon  
 > - Caballero Pérez Julio César  
-> - Hernandez Alvirde María Guadalupe  
+> - Hernandez Alvirde Maria Guadalupe  
+> - Aragon Martinez Manuel Alejandro  
 > **Repositorio:** https://github.com/JulioCesarCaballero/EDU_Tycoon  
 > **Fecha:** 5 de octubre de 2026  
 > **Versión de la ficha:** 2.0 (Entrega 1 - Puntos 1.1 y 1.3)  
