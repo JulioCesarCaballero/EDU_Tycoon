@@ -128,6 +128,21 @@ Se ejecutan con `gradlew.bat` (Windows) o `./gradlew` (macOS/Linux):
 
 La mayoría de las tareas se pueden limitar a un módulo con el prefijo `nombre:`. Por ejemplo, `core:clean` borra solo la carpeta `build` del módulo `core`.
 
+## Archivos que no se versionan (.gitignore)
+
+El archivo `.gitignore` evita subir al repositorio archivos que se generan solos o que son propios de cada computadora:
+
+| Categoría | Ejemplos | Por qué no se versiona |
+|---|---|---|
+| Salidas de compilación | `.gradle/`, `build/`, `*.class` | Gradle las regenera en cada compilación. Subirlas llena el repositorio y causa conflictos. |
+| Configuración local | `local.properties` | Guarda la ruta del Android SDK de cada computadora, que es distinta para cada integrante. Android Studio la crea al abrir el proyecto. |
+| Archivos del IDE | `.idea/`, `*.iml` | Preferencias personales de Android Studio. |
+| Librerías nativas | `android/libs/arm64-v8a/`, `x86/`, etc. | La tarea `copyAndroidNatives` las extrae de las dependencias en cada build. |
+| Generados del proyecto | `assets/assets.txt`, `.kotlin/` | Los crean la tarea `generateAssetList` y el compilador de Kotlin. |
+| Archivos del sistema | `.DS_Store`, `Thumbs.db` | Los genera el sistema operativo. |
+
+Por eso, después de clonar, el primer Gradle Sync tarda unos minutos: descarga y regenera todo lo que no está en el repositorio.
+
 ## Licencia
 
 Licencia MIT. Ver [`LICENSE`](LICENSE) y [`docs/licencias.md`](docs/licencias.md) para las dependencias de terceros y la procedencia de los recursos.
