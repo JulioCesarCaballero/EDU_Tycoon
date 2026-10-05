@@ -42,3 +42,15 @@ Se implementaron y ejecutaron con éxito las pruebas en `io.moviles.IPN_Tycoon.e
 Gradle Test Run :core:test
 Tests completed: 100% successful, 0 failures, 0 skipped.
 ```
+
+---
+
+## 📸 Evidencias Visuales de Implementación y QA
+
+### 1. Estado de Audio: ACTIVADO (Ruta Nominal)
+![Audio Activado](evidencia/entrega-1/qa-audio-activado.jpg)
+* **Descripción técnica:** Al iniciar la partida en `SeleccionPartida` o `GameScreen`, `AudioManager.iniciarMusicaAmbiental()` carga la pista en bucle `Route 1 Morning Breeze.mp3` con volumen moderado (`0.35f`). Al abrir el menú de pausa, el botón de control muestra la etiqueta `"Audio: ACTIVADO"` estilizada en color verde (`Color.GREEN`), indicando que los canales de música y sonido se encuentran activos y transmitiendo audio.
+
+### 2. Estado de Audio: SILENCIADO (Mute Reactivo)
+![Audio Silenciado](evidencia/entrega-1/qa-audio-silenciado.jpg)
+* **Descripción técnica:** Al interactuar con el botón en el menú de pausa, el evento `onChange` invoca `AudioManager.alternarAudio()`. El gestor actualiza `GameState.musicaActiva = false`, ajusta `volumenMaster = 0.0f` y pausa la pista en el motor de audio de libGDX (`Music.pause()`). La interfaz gráfica actualiza inmediatamente el texto a `"Audio: SILENCIADO"` en color coral/rojo (`Color.CORAL`), garantizando retroalimentación de accesibilidad visual y auditiva inmediata.
