@@ -1,4 +1,4 @@
-# Ficha de idea: IPN Tycoon (ruta EduTycoon)
+# Ficha de idea: Cafetería ESCOM Tycoon (ruta EduTycoon)
 
 > **Institución:** Instituto Politécnico Nacional (IPN)  
 > **Unidad Académica:** Escuela Superior de Cómputo (ESCOM)  
@@ -10,10 +10,10 @@
 > **Integrantes:**  
 > - Aragón Martínez Manuel  
 > - Caballero Pérez Julio César  
-> - Hernandez Alvirde Maria Guadalupe  
+> - Hernandez Alvirde María Guadalupe  
 > **Repositorio:** https://github.com/JulioCesarCaballero/EDU_Tycoon  
 > **Fecha:** 5 de octubre de 2026  
-> **Versión de la ficha:** 1.0 (Entrega 1 - Puntos 1.1 y 1.3)  
+> **Versión de la ficha:** 2.0 (Entrega 1 - Puntos 1.1 y 1.3)  
 
 ---
 
@@ -21,175 +21,201 @@
 
 ### 1. Ruta elegida y motivo
 
-**Ruta elegida:** EduTycoon (IPN Tycoon: Kotlin + libGDX en Android Nativo).
+**Ruta:** EduTycoon (Kotlin + libGDX, Android).
 
-**Motivo:** 
-1. **Identidad comunitaria y pertinencia contextual:** Refleja la cotidianidad y los desafíos reales de los estudiantes del IPN (especialmente de la ESCOM), quienes deben administrar su tiempo, rendimiento académico, estrés, horas de sueño y presupuesto económico para sobrevivir al semestre escolar.
-2. **Arquitectura modular nativa y probada:** El proyecto base EduTycoon ya cuenta con un desacoplamiento limpio entre la lógica multiplataforma (`core` en Kotlin puro con motores de economía y eventos) y el lanzador nativo de Android (`android`), facilitando la implementación de patrones de gestión de estado unidireccionales y pruebas unitarias aisladas sin dependencias del framework gráfico.
-3. **Mecánica de gestión ligera (Tycoon Casual / Micro-decisiones):** Permite diseñar sesiones ágiles y adictivas de 3 a 5 minutos, ideales para jugar con una sola mano en trayectos de transporte público (Metro Politécnico/Lindavista o Metrobús) o tiempos muertos entre bloques de clase.
+**Motivo:** EduTycoon ya tiene el motor base que necesita un juego de gestión y simulación de negocio: saldo persistente (`GameState`), regla estricta de compra (`puedeComprar` / `gastar`), simulación por ciclos (`GameCycleEngine`), resolución de ingresos (`EconomyEngine`), generador de eventos aleatorios (`EventEngine`) y persistencia local mediante Room.
+
+En lugar de administrar la macroeconomía de todo el IPN de forma abstracta, adaptamos esa arquitectura hacia una vivencia estudiantil directa y tangible: **gestionar un puesto de comida dentro de la ESCOM**. De esta forma, el juego enseña conceptos fundamentales de microeconomía (costo unitario, margen de ganancia, fijación de precios, caducidad e inventario perecedero) dentro de un contexto escolar que los alumnos viven diariamente.
 
 ---
 
 ### 2. Usuario y contexto
 
-* **¿Quién es el usuario?:** Estudiante universitario activo del IPN (18 a 24 años), principalmente de Ingeniería en Sistemas Computacionales y carreras afines con alta carga de trabajo práctico, que juega en dispositivos móviles Android y conoce los planteles del Instituto (ESCOM, ESFM, ENCB, etc.).
-* **¿Dónde y cuándo usaría la aplicación?:** En partidas cortas de 3 a 8 minutos durante sus trayectos cotidianos en transporte público (Metro o camión hacia Zacatenco), en descansos de pasillo o cafetería entre clases, o en periodos de desconexión breve al finalizar su jornada académica. Juega habitualmente con interrupciones y requiere que el juego preserve su estado sin pérdidas.
+* **¿Quién es?:** Un estudiante de la ESCOM o del IPN, de 18 a 24 años, que vende o ha pensado vender comida en la escuela (tortas, café, burritos, dulces), o que busca comprender de manera práctica cómo opera un pequeño emprendimiento estudiantil.
+* **¿Dónde y cuándo usaría la app?:** En partidas cortas de 5 a 10 minutos: en el transporte público (Metro o camión) camino a la escuela, en pausas entre clases o en la fila de la cafetería escolar. Juega en orientación horizontal, en sesiones susceptibles a interrupciones rápidas, esperando poder pausar la partida y retomarla posteriormente sin pérdida de datos.
 
 ---
 
 ### 3. Problema observable en una sola frase
 
-> *"El estudiante gasta su presupuesto escolar y administra sus recursos sin conocer previamente el saldo restante ni el impacto que sus decisiones tendrán en sus niveles de estrés, descanso y finanzas, terminando en bancarrota o colapso académico sin entender la causa."*
+> **"Los estudiantes que quieren vender comida en la escuela compran insumos sin calcular costo, precio y demanda, y se dan cuenta de que perdieron dinero hasta que ya lo gastaron."**
 
 ---
 
 ### 4. Alternativa actual
 
-Hoy, dentro del juego y en su vida diaria, el usuario:
-- Decide a prueba y error, o intenta calcular mentalmente el dinero que le sobrará.
-- Solo se entera de que no le alcanza **después** de pulsar el botón de compra, cuando este cambia tardíamente a *"¡Saldo insuficiente!"*.
-- Visualiza en la ventana del plantel un ingreso por ciclo que **no coincide** con el que realmente acredita el motor económico (`BuildingInfoWindow.kt` calcula `baseAlumnos * nivel * 10`, pero `EconomyEngine.kt` acredita `baseAlumnos * nivel * 100`).
-- Recurre a simuladores genéricos extranjeros (*BitLife*, *Reigns*) que carecen de contexto universitario local, o a apps de productividad pesadas (*Notion*, *Google Calendar*) que generan aburrimiento en lugar de una experiencia lúdica formativa.
+Hoy, quien busca aprender a administrar un puesto escolar:
+- Aprende a prueba y error **con su propio dinero**: compra insumos de más, sufre mermas por alimentos que se echan a perder o fija precios que no cubren sus costos operativos.
+- Usa notas en el celular o una hoja de cálculo estática, herramientas que no simulan la variabilidad de la demanda ni imprevistos como lluvia, suspensión de clases o semanas de evaluación.
+- Juega simuladores *tycoon* genéricos comerciales (restaurantes, cadenas de café) desvinculados de la realidad escolar: horarios de receso, días de examen, puentes oficiales y presupuestos limitados de estudiante.
 
 ---
 
 ### 5. Tarea principal
 
-> **Evaluar y ejecutar compras de planteles o toma de decisiones académicas con el presupuesto disponible, conociendo de forma anticipada y visible cuánto saldo le quedará y el impacto directo en sus recursos antes de confirmar.**
+> **Preparar el puesto para un día de clases (comprar insumos con el saldo disponible y fijar precios de venta) y completar el día sabiendo con exactitud si ganó o perdió dinero y por qué.**
 
 ---
 
 ### 6. Criterio de éxito
 
-La propuesta se considera exitosa si, en una prueba de usabilidad con al menos 5 estudiantes de ESCOM que no hayan jugado previamente:
-1. Al menos **4 de 5** logran comprar o mejorar un plantel en **menos de 2 minutos** sin requerir instrucciones externas.
-2. Al menos **4 de 5** identifican y expresan verbalmente, **antes de presionar el botón de compra**, cuánto saldo les quedará después de la transacción.
-3. En el **100% de los casos**, el sistema bloquea cualquier intento de compra con fondos insuficientes, garantizando que el saldo jamás resulte negativo ni se generen sobregiros.
-4. El jugador comprende visualmente el balance de recursos esenciales para sobrevivir a los ciclos del semestre.
+La propuesta se considera exitosa si, en una prueba de usabilidad con al menos 5 compañeros de ESCOM que no hayan jugado previamente:
+1. Al menos **4 de 5** completan el ciclo completo de un día (comprar insumos, fijar precios, abrir el puesto y revisar el resumen financiero) en **menos de 3 minutos**, de manera autónoma y sin ayuda.
+2. Al menos **4 de 5** pueden explicar, al consultar el resumen final, **si tuvieron ganancia o pérdida neta y cuál fue la causa principal** (por ejemplo: *"se me quedaron 8 cafés sin vender"* o *"el precio asignado fue menor al costo del insumo"*).
+3. En el **100% de los intentos**, el sistema impide realizar compras de insumos que superen el saldo disponible, garantizando que el dinero jamás resulte negativo.
 
 ---
 
 ### 7. Delimitación del alcance: Primera versión (MVP - Entrega 1)
 
-Lo que **entra** en la primera versión (construido y verificado sobre el repositorio):
-* **Mapa interactivo del IPN:** Visualización de planteles escolares (ESCOM, Dirección General, Cafetería, etc.) y barra superior (HUD) con saldo de dinero, alumnos y ciclos jugados.
-* **Ventana de gestión de plantel con información transparente:** Indicación clara del costo, saldo actual, **saldo restante proyectado tras la compra** e ingreso real por ciclo sincronizado con `EconomyEngine`.
-* **Regla estricta de validación de compra:** Si el costo supera el saldo, el botón se inicializa deshabilitado desde que se abre la ventana, se resalta en color rojo e indica **cuánto dinero falta** para realizar la operación.
-* **Actualización atómica de estado:** Actualización inmediata de saldo en `GameState`, nivel del edificio y cambio visual del sprite en el mapa sin inconsistencias de concurrencia.
-* **Manejo de estados alternos:**
-  * **Carga:** Al inicializar la partida o cargar slots locales.
-  * **Vacío:** Cuando el plantel ya alcanzó su nivel máximo o no existen registros previos.
-  * **Dato inválido / Error:** Detección y bloqueo de compras con saldo insuficiente.
-  * **Persistencia local:** Guardado y recuperación confiable del estado de la partida.
+Lo que **entra** en la primera versión:
+- **Un solo puesto operativo:** La Cafetería de la ESCOM (inmueble ya modelado en `PropiedadRepository`).
+- **4 productos emblemáticos:** Torta, café, burrito y agua embotellada. Cada uno con su costo unitario de insumo, precio de venta al público y factor de caducidad (el alimento no vendido al final del día se pierde como merma, excepto el agua).
+- **Módulo de compra de insumos:** Selección de cantidad por producto, desglose del costo total y visualización clara del **saldo restante proyectado** antes de confirmar.
+- **Regla estricta de compra:** Validación que bloquea la transacción si el costo total excede el saldo actual. El botón se desactiva e indica explícitamente cuánto dinero falta.
+- **Fijación de precios:** El jugador establece el precio de venta de cada producto dentro de un rango comercial permitido.
+- **Ciclo dinámico (Un día = Un ciclo):** Llegada de clientes simulada por intervalos horarios (alta afluencia en recesos y salida de clases), respondiendo al precio fijado y al inventario disponible.
+- **Eventos aleatorios contextuales (`EventEngine`):** Situaciones típicas como semana de exámenes departamentales (mayor demanda de café), día lluvioso (menor afluencia general) o viernes de puente (plantel semivacío).
+- **Pantalla de resumen del día:** Unidades vendidas, mermas/sobrantes, ingresos brutos, gastos de compra y utilidad neta final.
+- **Persistencia local:** Guardado y carga del progreso mediante base de datos Room.
+- **Manejo riguroso de estados alternos:**
+  - **Carga:** Durante la simulación del ciclo del día o lectura de partidas guardadas.
+  - **Vacío:** Intento de abrir el puesto sin inventario, o ausencia de partidas previas.
+  - **Error:** Falla en la persistencia o lectura de datos locales.
+  - **Dato inválido:** Compra que excede fondos, cantidades en cero o precios fuera de rango.
 
 ---
 
 ### 8. Funciones aplazadas (Deliberadamente fuera del MVP)
 
-Para mantener un alcance verificable y técnicamente riguroso en este primer avance, se aplazan para entregas posteriores:
-* **Gestión de estrés y sueño avanzada con minijuegos de código:** Se aplaza para la Entrega 2 para priorizar la estabilidad de las reglas económicas y de compra en la Entrega 1.
-* **Préstamos estudiantiles y sistema de deuda bancaria controlada:** Requiere diseño de tasas de interés y penalizaciones semestrales.
-* **Eventos con ramificaciones complejas de diálogo:** Actualmente los eventos se disparan por ciclo de forma automática.
-* **Sincronización en la nube y tabla de clasificación global (Leaderboard):** Evita dependencias de red y servicios externos no solicitados en la Entrega 1.
-* **Árbol de materias optativas y habilidades del estudiante:** Se aplaza para la Entrega final.
+Para garantizar un alcance verificable, estable y enfocado en la Entrega 1:
+- Gestión de múltiples locales o expansión a otras escuelas de Zacatenco (mapa completo del juego base).
+- Contratación de ayudantes, turnos de trabajo y salarios.
+- Adquisición de mejoras de infraestructura (refrigerador industrial, cafetera exprés, mobiliario adicional).
+- Creación de recetas combinadas o ensamblado artesanal de ingredientes.
+- Negociación con múltiples proveedores o solicitudes de crédito/deuda.
+- Tablas de clasificación en línea, logros globales y sincronización en la nube.
 
 ---
 
-### 9. Evidencia e hipótesis pendiente de validar
+### 9. Evidencia técnica e hipótesis pendiente de validar
 
-#### Evidencia técnica observada en el repositorio base
+#### Base técnica existente en el repositorio (Factibilidad)
 
-| Fecha | Método | Resultado real |
+| Fecha | Método | Resultado observado |
 | :--- | :--- | :--- |
-| **04/10/2026** | Inspección estática de código | `BuildingInfoWindow.kt` calcula el ingreso mostrado con `baseAlumnos * nivel * 10`, mientras que `EconomyEngine.kt` acredita `baseAlumnos * nivel * 100`. La interfaz subestimaba por un factor de 10 el beneficio real del edificio. |
-| **04/10/2026** | Prueba de interacción en UI | El aviso de fondos insuficientes solo se desplegaba de forma reactiva al hacer clic en el botón de compra, omitiendo indicar preventivamente el monto faltante. |
-| **04/10/2026** | Análisis de transacciones | En `EventEngine.kt`, si un evento de gasto superaba el saldo disponible, la función `gastar()` retornaba `false` sin alertar explícitamente al jugador del bloqueo. |
+| **04/10/2026** | Inspección de arquitectura | `GameState` ya implementa control de saldo con `puedeComprar()` y `gastar()`, proporcionando el soporte directo para la regla de compra de insumos. |
+| **04/10/2026** | Análisis de motores | `GameCycleEngine`, `EconomyEngine` y `EventEngine` resuelven la simulación por turnos y contingencias; un ciclo modela perfectamente un día escolar de venta. |
+| **04/10/2026** | Catálogo de datos y Room | `PropiedadRepository` ya contiene la "Cafetería" y "Mac and Cheese", y la persistencia local con Room se encuentra operativa en la capa Android. |
 
-#### Declaración explícita de hipótesis sin validar
+*Nota técnica:* Esta tabla certifica la factibilidad de desarrollo sobre el código base; no sustituye la validación empírica con usuarios reales.
 
-> **Hipótesis pendiente de validar:**
-> *"Se declara formalmente que esta propuesta constituye una **hipótesis pendiente de validar**. Se plantea que proporcionar al estudiante una interfaz con desglose preventivo del saldo restante proyectado y bloqueo explícito con monto faltante incrementa la comprensión económica y reduce en al menos un 80% las partidas perdidas por insolvencia no planificada en comparación con la interfaz reactiva original.*
-> 
-> *La validación experimental se realizará antes de la Entrega 2 mediante pruebas presenciales con 5 compañeros de ESCOM evaluando tiempo de decisión, tasa de error y retroalimentación cualitativa."*
+#### Hipótesis pendientes de validar
+
+⚠️ **Declaración formal:** A la fecha de entrega no se han ejecutado encuestas cuantitativas ni pruebas de campo formales. Se plantean formalmente las siguientes hipótesis de trabajo:
+
+> 1. Los estudiantes que comercializan alimentos en el plantel habitualmente no realizan un cálculo formal de costo unitario, precio de venta ni merma antes de surtirse de insumos.
+> 2. Una simulación móvil ágil que transparente el costo de insumos, el saldo restante proyectado y el balance de cierre permite a los alumnos entender con mayor rapidez por qué un puesto genera utilidad o quiebra.
+
+**Plan de validación empírica (a ejecutar previo a la Entrega 2):**
+
+| Pregunta de investigación | Método | Muestra | Criterio de validación |
+| :--- | :--- | :--- | :--- |
+| **¿Calculan costos y precios antes de comprar?** | Entrevista estructurada (5 preguntas) | 5 estudiantes que vendan comida en la ESCOM | Al menos 3 de 5 declaran que no calculan con anticipación o que lo hacen solo de forma estimada ("a ojo"). |
+| **¿Es intuitiva la tarea principal?** | Prueba de usabilidad con la v1 | 5 compañeros de clase | Al menos 4 de 5 completan la jornada de un día en menos de 3 minutos sin requerir orientación externa. |
+| **¿Comprenden la causa de sus resultados?** | Cuestionario posterior a la partida | Los mismos 5 usuarios | Al menos 4 de 5 explican correctamente a partir del resumen si su balance fue positivo o negativo y qué insumo provocó el resultado. |
 
 ---
 
 ## 1.3 Historias de usuario y criterios de aceptación
 
-### Historia de Usuario Principal (Core Gameplay Loop)
+### Historia de Usuario Principal (Core Loop del Puesto de Comida)
 
 ```gherkin
-Como estudiante de ingeniería en sistemas y jugador de EduTycoon,
-quiero conocer con anticipación el costo, el saldo que me quedará y el ingreso que generará un plantel antes de comprarlo,
-para tomar decisiones financieras inteligentes y evitar quedarme sin saldo para operar durante el semestre escolar.
+Como estudiante emprendedor y jugador de Cafetería ESCOM Tycoon,
+quiero comprar insumos para mi puesto conociendo el costo total y el saldo restante antes de confirmar,
+para abastecer mi inventario del día sin gastar más dinero del disponible ni provocar la insolvencia de mi negocio.
 ```
 
 ---
 
-### Criterio de Aceptación Principal (Ruta Feliz: Compra Válida con Fondos Suficientes)
+### Criterio de Aceptación Principal (Ruta Feliz: Compra Válida de Insumos)
 
 ```gherkin
-Escenario: Compra exitosa de un plantel educativo con saldo suficiente
-  Dado que el jugador tiene un saldo disponible de $500,000 MXN en GameState,
-    y selecciona el plantel "Escuela de Computación" (precio: $300,000 MXN, nivel actual: 0, no comprada),
-  Cuando abre la ventana de gestión del plantel ("BuildingInfoWindow"),
-  Entonces el botón de acción aparece habilitado con el texto "COMPRAR $300.0K",
-    y se muestra la etiqueta con el saldo proyectado posterior a la compra ("Saldo restante: $200.0K"),
-    y al pulsar el botón, el saldo disminuye a $200,000 MXN,
-    y el plantel se marca como comprado con nivel 1,
-    y la ventana se cierra actualizando el sprite del edificio en el mapa del IPN.
+Escenario: Compra exitosa de insumos dentro del presupuesto disponible
+  Dado que el jugador dispone de un saldo de $500.00 MXN en GameState,
+    y se encuentra en la pantalla de abastecimiento del puesto "Cafetería ESCOM",
+    y selecciona 10 tortas (costo unitario: $20.00 MXN, subtotal: $200.00 MXN) 
+    y 10 cafés (costo unitario: $10.00 MXN, subtotal: $100.00 MXN),
+  Cuando visualiza el desglose con un costo total de $300.00 MXN y presiona el botón "Confirmar Compra",
+  Entonces el sistema debita exitosamente los $300.00 MXN reflejando un saldo restante de $200.00 MXN,
+    y el inventario del puesto se actualiza sumando 10 tortas y 10 cafés,
+    y la interfaz habilita el botón "Abrir Puesto" para iniciar el día de clases.
 ```
 
-*Verificabilidad:* **Sí / No**. Un evaluador externo puede abrir la ventana, corroborar que el saldo proyectado coincida con la resta aritmética ($500K - $300K = $200K), pulsar el botón y constatar que el saldo y el nivel se actualicen en pantalla sin margen de interpretación.
+*Verificabilidad:* **Sí / No**. Un evaluador externo puede ingresar las cantidades de insumos, comprobar que el saldo resultante coincida con la resta aritmética exacta ($500.00 - $300.00 = $200.00), presionar el botón de confirmación y constatar que el inventario se actualice en pantalla sin ambigüedades.
 
 ---
 
 ### Criterios de Aceptación para Estados Alternos y Casos Límite
 
-#### Escenario Alterno 1: Bloqueo de Compra por Saldo Insuficiente (Dato Inválido / Regla de Compra)
+#### Escenario Alterno 1: Bloqueo de Compra de Insumos por Saldo Insuficiente (Dato Inválido / Regla de Compra)
 ```gherkin
-Escenario: Intento de compra cuando el costo supera el saldo disponible
-  Dado que el jugador dispone de un saldo de $150,000 MXN,
-    y abre la ventana del plantel "Dirección General" cuyo costo es de $5,000,000 MXN,
-  Cuando se renderiza la ventana de gestión,
-  Entonces el botón de acción se inicializa automáticamente deshabilitado (isDisabled = true),
-    y el texto del botón se muestra en color rojo con el mensaje de advertencia y el saldo faltante: "¡SALDO INSUFICIENTE! (Faltan $4.85M)",
-    y el saldo del jugador permanece intacto en $150,000 MXN sin permitir cobros parciales ni sobregiros.
+Escenario: El jugador intenta comprar insumos cuyo costo total excede su saldo
+  Dado que el jugador cuenta con un saldo de $150.00 MXN,
+    y selecciona insumos por un costo total de $400.00 MXN,
+  Cuando el sistema calcula el importe de la orden,
+  Entonces el botón "Confirmar Compra" se muestra deshabilitado (isDisabled = true),
+    y el texto del botón se despliega en color rojo advirtiendo: "¡Saldo insuficiente! (Faltan $250.00)",
+    y el saldo del jugador permanece intacto en $150.00 MXN sin registrar cargos ni entrega de productos.
 ```
 
-#### Escenario Alterno 2: Mejora de Nivel con Fondos Insuficientes
+#### Escenario Alterno 2: Fin de Jornada Escolar con Mermas y Balance Diario (Resumen del Día)
 ```gherkin
-Escenario: El jugador intenta mejorar un plantel comprado sin tener el saldo requerido
-  Dado que el jugador posee el plantel "Cafetería" en nivel 1 (costo de mejora a nivel 2: $150,000 MXN),
-    y su saldo actual en GameState es de $40,000 MXN,
-  Cuando abre la ventana del plantel,
-  Entonces el sistema evalúa que el saldo ($40,000) es menor al costo de mejora ($150,000),
-    y el botón de mejora permanece deshabilitado indicando el faltante de $110,000 MXN,
-    y no se incrementa el nivel del plantel.
+Escenario: Conclusión de las ventas del día y registro de productos perecederos
+  Dado que el jugador abrió el puesto con 15 tortas y 20 cafés,
+    y durante el ciclo del día se vendieron 10 tortas y 18 cafés,
+  Cuando finaliza el horario escolar (cierre del ciclo),
+  Entonces el sistema calcula que las 5 tortas y 2 cafés no vendidos se registran como merma (caducidad),
+    y se despliega la pantalla de resumen diario detallando ingresos por venta, costo inicial de insumos y ganancia neta,
+    y el inventario perecedero se reinicia en cero para el día siguiente.
 ```
 
-#### Escenario Alterno 3: Manejo de Estado Límite / Vacío (Plantel en Nivel Máximo)
+#### Escenario Alterno 3: Manejo de Estado Vacío (Puesto sin Inventario)
 ```gherkin
-Escenario: El plantel ha alcanzado su límite de mejora
-  Dado que el plantel "Auditorio Alejo Peralta" se encuentra en su nivel máximo de mejora (nivel 2 de 2),
-  Cuando el usuario consulta la ventana de información del plantel,
-  Entonces el botón de acción aparece deshabilitado con el texto "NIVEL MÁXIMO",
-    y no se muestra costo de mejora ni opciones de compra,
-    y el sistema indica que la capacidad operativa del inmueble está al 100%.
+Escenario: Intento de iniciar ventas sin haber adquirido insumos
+  Dado que el jugador cuenta con 0 unidades en todos los productos de su inventario,
+  Cuando pulsa el botón "Abrir Puesto",
+  Entonces el sistema bloquea el avance del ciclo,
+    y presenta una advertencia visual indicando: "Inventario vacío: Debes surtir insumos antes de abrir la cafetería",
+    y mantiene la pantalla en el módulo de compras sin avanzar el reloj del día.
 ```
 
-#### Escenario Alterno 4: Restablecimiento y Consistencia de Partida (*Reset State*)
+#### Escenario Alterno 4: Validación de Fijación de Precios fuera de Rango (Dato Inválido)
 ```gherkin
-Escenario: Inicio de una nueva partida o reseteo de progreso
-  Dado que el jugador decide reiniciar su partida desde el menú principal,
-  Cuando se invoca el reinicio del juego,
-  Entonces el saldo se restablece al valor base inicial ($500,000 MXN),
-    y todos los planteles vuelven al estado de no comprados (nivel 0),
-    y el contador de ciclos jugados se reinicia a 0 sin que queden datos residuales en memoria.
+Escenario: El usuario intenta fijar un precio inferior al costo o excesivamente elevado
+  Dado que una torta tiene un costo de insumo de $20.00 MXN (rango de venta válido: $22.00 a $45.00 MXN),
+  Cuando el usuario intenta ingresar un precio de venta de $15.00 MXN o de $100.00 MXN,
+  Entonces la interfaz rechaza el valor ingresado,
+    y colorea el campo en advertencia mostrando el mensaje: "Precio fuera de rango comercial ($22 - $45)",
+    y restablece el campo al precio sugerido por defecto.
+```
+
+#### Escenario Alterno 5: Restablecimiento y Consistencia de Partida (*Reset State*)
+```gherkin
+Escenario: Reinicio del emprendimiento tras una quiebra o desde el menú
+  Dado que el jugador decide iniciar una nueva partida,
+  Cuando confirma la acción "Reiniciar Cafetería",
+  Entonces el saldo vuelve al capital inicial base ($500.00 MXN),
+    y el inventario se reinicia en 0,
+    y el contador de días se restablece en "Día 1 / Semana 1" sin dejar estados residuales en Room ni en memoria.
 ```
 
 ---
 
 ## 10. Declaración de uso de herramientas de Inteligencia Artificial
 
-* En apego a los lineamientos de la entrega, se declara de forma transparente que para la redacción inicial y estructuración de la ficha de idea se consultó **Claude (Anthropic)**, y para la profundización técnica, integración del modelo de micro-gestión estudiantil y formulación formal de las historias de usuario y criterios de aceptación Gherkin verificables se utilizó **Gemini (Google DeepMind)**. Todo el contenido fue revisado, adaptado y validado técnicamente por los integrantes del equipo.
+* En estricto apego a los lineamientos éticos de la materia, se declara de forma transparente que:
+  * El primer borrador de la ficha y la delimitación conceptual del negocio escolar fueron estructurados con el apoyo de **Claude (Anthropic)**.
+  * La articulación técnica de la arquitectura de software, la especificación de motores de libGDX (`GameState`, `EconomyEngine`, `EventEngine`), y la formulación rigurosa de las historias de usuario y criterios de aceptación en sintaxis formal Gherkin verificable fueron desarrolladas y refinadas con **Gemini (Google DeepMind)**.
+  * Todos los textos, supuestos de negocio y reglas fueron revisados, verificados y aprobados por los integrantes del equipo.
