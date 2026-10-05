@@ -288,6 +288,7 @@ class GameScreen(game: Main) : BaseScreen(game) {
     // ─────────────────────────────────────────────────────────────────
     override fun show() {
         super.show()
+        io.moviles.IPN_Tycoon.engine.AudioManager.iniciarMusicaAmbiental()
         val skin   = Scene2DSkin.defaultSkin
         val fuente = skin.getFont("default-font")
 

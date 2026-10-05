@@ -16,10 +16,10 @@ class AudioManagerTest {
     }
 
     @Test
-    fun `audio inicializado por defecto como activo con volumen maximo`() {
+    fun `audio inicializado por defecto como activo con volumen normal moderado`() {
         assertTrue(AudioManager.audioHabilitado)
         assertTrue(GameState.musicaActiva)
-        assertEquals(1.0f, AudioManager.volumenMaster, 0.001f)
+        assertEquals(AudioManager.VOLUMEN_NORMAL, AudioManager.volumenMaster, 0.001f)
         assertEquals("Audio: ACTIVADO", AudioManager.obtenerTextoBoton())
     }
 
@@ -35,7 +35,7 @@ class AudioManagerTest {
     }
 
     @Test
-    fun `alternarAudio reactiva el audio y restaura volumen al maximo`() {
+    fun `alternarAudio reactiva el audio y restaura volumen normal`() {
         // Primer toggle: silencia
         AudioManager.alternarAudio()
         assertFalse(AudioManager.audioHabilitado)
@@ -46,7 +46,7 @@ class AudioManagerTest {
         assertTrue(reactivado)
         assertTrue(AudioManager.audioHabilitado)
         assertTrue(GameState.musicaActiva)
-        assertEquals(1.0f, AudioManager.volumenMaster, 0.001f)
+        assertEquals(AudioManager.VOLUMEN_NORMAL, AudioManager.volumenMaster, 0.001f)
         assertEquals("Audio: ACTIVADO", AudioManager.obtenerTextoBoton())
     }
 
@@ -58,6 +58,13 @@ class AudioManagerTest {
 
         AudioManager.setAudio(true)
         assertTrue(AudioManager.audioHabilitado)
-        assertEquals(1.0f, AudioManager.volumenMaster, 0.001f)
+        assertEquals(AudioManager.VOLUMEN_NORMAL, AudioManager.volumenMaster, 0.001f)
+    }
+
+    @Test
+    fun `iniciarMusicaAmbiental maneja entornos headless de prueba sin lanzar excepciones`() {
+        // En entorno JUnit headless (sin contexto gráfico libGDX), debe ser seguro
+        AudioManager.iniciarMusicaAmbiental("Route 1 Morning Breeze.mp3")
+        assertEquals("Route 1 Morning Breeze.mp3", AudioManager.pistaActual)
     }
 }
