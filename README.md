@@ -1,133 +1,133 @@
 # IPN Tycoon (EDU_Tycoon)
 
-IPN Tycoon is a tycoon-style management game set in the Instituto Politécnico Nacional (IPN). The player takes the role of Director General and manages schools, budget, teachers, and reputation.
+IPN Tycoon es un juego de gestión estilo tycoon ambientado en el Instituto Politécnico Nacional (IPN). El jugador toma el rol de Director General y administra escuelas, presupuesto, docentes y reputación.
 
-This repository is a fork of [EmmanuelJuarez14/EDU_Tycoon](https://github.com/EmmanuelJuarez14/EDU_Tycoon).
+Este repositorio es un fork de [EmmanuelJuarez14/EDU_Tycoon](https://github.com/EmmanuelJuarez14/EDU_Tycoon).
 
-## Tech stack
+## Tecnologías
 
-- [libGDX](https://libgdx.com/) 1.14.0 (game engine), generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff)
-- Kotlin 2.2.10 with [KTX](https://libktx.github.io/) extensions
-- AndroidX Room (local SQLite database for saved games)
-- [Gradle](https://gradle.org/) with the included Gradle Wrapper
+- [libGDX](https://libgdx.com/) 1.14.0 (motor del juego), generado con [gdx-liftoff](https://github.com/libgdx/gdx-liftoff)
+- Kotlin 2.2.10 con las extensiones [KTX](https://libktx.github.io/)
+- AndroidX Room (base de datos SQLite local para las partidas guardadas)
+- [Gradle](https://gradle.org/) con el Gradle Wrapper incluido
 
-## Modules
+## Módulos
 
-- `core`: game logic shared by all platforms. Entry class: `io.moviles.IPN_Tycoon.Main`.
-- `android`: Android launcher (`AndroidLauncher`), manifest, Android resources, and Room database. Needs the Android SDK.
-- `assets`: game resources, including the isometric Tiled map `Mapa/Mapa_General.tmx`, packaged into the APK.
-- `docs`: project documentation.
+- `core`: lógica del juego compartida por todas las plataformas. Clase de entrada: `io.moviles.IPN_Tycoon.Main`.
+- `android`: lanzador de Android (`AndroidLauncher`), manifiesto, recursos de Android y base de datos Room. Requiere el Android SDK.
+- `assets`: recursos del juego, incluido el mapa isométrico de Tiled `Mapa/Mapa_General.tmx`, que se empaqueta en el APK.
+- `docs`: documentación del proyecto.
 
-## Architecture
+## Arquitectura
 
-The project is split into two Gradle modules. `android` is the platform layer: it starts the app, builds the Room database, and injects the save system into the game. `core` holds the game itself, organized in three layers: presentation (screens and windows), logic (`engine/`), and data (`data/`). Everything runs on the device; the app does not use the network.
+El proyecto se divide en dos módulos de Gradle. `android` es la capa de plataforma: inicia la app, construye la base de datos Room e inyecta el sistema de guardado en el juego. `core` contiene el juego, organizado en tres capas: presentación (pantallas y ventanas), lógica (`engine/`) y datos (`data/`). Todo se ejecuta en el dispositivo; la app no usa la red.
 
-### Overview
+### Vista general
 
-![IPN Tycoon architecture overview](docs/img/arquitectura-general.png)
+![Vista general de la arquitectura de IPN Tycoon](docs/img/arquitectura-general.png)
 
-### App startup
+### Arranque de la app
 
-`AndroidLauncher.onCreate()` creates the database, the repository, and `AndroidGameSaveManager`, and passes it to `Main`. This way `core` never depends on Android (dependency injection).
+`AndroidLauncher.onCreate()` crea la base de datos, el repositorio y `AndroidGameSaveManager`, y se lo pasa a `Main`. Así `core` nunca depende de Android (inyección de dependencias).
 
-![App startup](docs/img/arquitectura-arranque.png)
+![Arranque de la app](docs/img/arquitectura-arranque.png)
 
-### Game cycle
+### Ciclo del juego
 
-Every 30 seconds, `GameScreen` calls `GameCycleEngine.advanceCycle()`. The cycle notifies its listeners (`EconomyEngine`, `EstudiantesEngine`, `EventEngine`), which update `GameState` (Observer pattern).
+Cada 30 segundos, `GameScreen` llama a `GameCycleEngine.advanceCycle()`. El ciclo notifica a sus listeners (`EconomyEngine`, `EstudiantesEngine`, `EventEngine`), que actualizan `GameState` (patrón Observador).
 
-![Game cycle](docs/img/arquitectura-ciclo-juego.png)
+![Ciclo del juego](docs/img/arquitectura-ciclo-juego.png)
 
-### Save system
+### Sistema de guardado
 
-Screens save and load through the `GameSaveManager` interface. On Android, `AndroidGameSaveManager` uses the repositories, DAOs, and entities to store data in a local SQLite database with Room.
+Las pantallas guardan y cargan mediante la interfaz `GameSaveManager`. En Android, `AndroidGameSaveManager` usa los repositorios, DAOs y entidades para guardar los datos en una base SQLite local con Room.
 
-![Save system](docs/img/arquitectura-persistencia.png)
+![Sistema de guardado](docs/img/arquitectura-persistencia.png)
 
-## Tested environment
+## Entorno probado
 
-| Tool | Version |
+| Herramienta | Versión |
 |---|---|
-| Operating system | Windows 11 Pro, 64-bit (x64) |
+| Sistema operativo | Windows 11 Pro, 64 bits (x64) |
 | Android Studio | Quail 3 2026.1.3 (Build #AI-261.26222.65.2613.15948027) |
-| Gradle JDK | JDK 21 (Gradle JVM criteria in Android Studio) |
-| Gradle distribution | Gradle Wrapper (included in the repository) |
-| Android SDK Platform | API 35 (compileSdk / targetSdk) |
+| JDK de Gradle | JDK 21 (Gradle JVM criteria en Android Studio) |
+| Distribución de Gradle | Gradle Wrapper (incluido en el repositorio) |
+| Plataforma del Android SDK | API 35 (compileSdk / targetSdk) |
 | Android Gradle Plugin | 8.9.3 |
 | Kotlin | 2.2.10 |
-| Test device | Xiaomi 2511FPC34G (physical phone, USB debugging), Android 16 (API 36) |
+| Dispositivo de prueba | Xiaomi 2511FPC34G (celular físico, depuración USB), Android 16 (API 36) |
 
-## Run from a clean clone
+## Ejecutar desde un clon limpio
 
-### Prerequisites
+### Requisitos previos
 
-1. Install **Git**: https://git-scm.com/
-2. Install **Android Studio** (a version compatible with Android Gradle Plugin 8.9.3). It includes a JDK, so no separate Java installation is needed. The project requires **JDK 17 or newer**.
-3. In Android Studio, open **Tools > SDK Manager** and install **Android SDK Platform 35** (Android 15).
+1. Instalar **Git**: https://git-scm.com/
+2. Instalar **Android Studio** (una versión compatible con Android Gradle Plugin 8.9.3). Incluye un JDK, así que no hace falta instalar Java aparte. El proyecto requiere **JDK 17 o superior**.
+3. En Android Studio, abrir **Tools > SDK Manager** e instalar **Android SDK Platform 35** (Android 15).
 
-### Steps
+### Pasos
 
-1. Clone the repository:
+1. Clonar el repositorio:
 
    ```
    git clone https://github.com/JulioCesarCaballero/EDU_Tycoon.git
    ```
 
-2. Open Android Studio, choose **File > Open**, and select the root `EDU_Tycoon` folder (not `android` or `core`).
-3. Wait for the **Gradle Sync** to finish. The first sync downloads all dependencies and can take several minutes. Android Studio creates `local.properties` with your SDK path automatically.
-4. If the sync fails because of the JDK, go to **File > Settings > Build, Execution, Deployment > Build Tools > Gradle** and set the Gradle JDK to version 17 or newer (the bundled JetBrains Runtime works).
-5. Prepare a device:
-    - **Emulator:** open **Device Manager**, create a virtual device with API 21 or higher, and start it.
-    - **Physical phone:** follow [Running on a physical phone](#running-on-a-physical-phone) and connect it by USB.
-6. In the run configuration selector (top toolbar), choose **`android`** and the target device.
-7. Press **Run ▶**. The game opens in landscape mode.
+2. Abrir Android Studio, elegir **File > Open** y seleccionar la carpeta raíz `EDU_Tycoon` (no `android` ni `core`).
+3. Esperar a que termine el **Gradle Sync**. La primera sincronización descarga todas las dependencias y puede tardar varios minutos. Android Studio crea `local.properties` con la ruta de tu SDK automáticamente.
+4. Si la sincronización falla por el JDK, ir a **File > Settings > Build, Execution, Deployment > Build Tools > Gradle** y poner el JDK de Gradle en versión 17 o superior (el JetBrains Runtime incluido funciona).
+5. Preparar un dispositivo:
+    - **Emulador:** abrir **Device Manager**, crear un dispositivo virtual con API 21 o superior e iniciarlo.
+    - **Celular físico:** seguir [Ejecutar en un celular físico](#ejecutar-en-un-celular-físico) y conectarlo por USB.
+6. En el selector de configuración de ejecución (barra superior), elegir **`android`** y el dispositivo.
+7. Presionar **Run ▶**. El juego se abre en modo horizontal.
 
-### Command line alternative
+### Alternativa por línea de comandos
 
-From the repository root (Windows):
+Desde la raíz del repositorio (Windows):
 
 ```
 gradlew.bat android:installDebug
 gradlew.bat android:run
 ```
 
-On macOS/Linux use `./gradlew` instead of `gradlew.bat`. The `run` task needs either `local.properties` with `sdk.dir` or the `ANDROID_SDK_ROOT` environment variable, and a connected device or running emulator.
+En macOS/Linux usar `./gradlew` en lugar de `gradlew.bat`. La tarea `run` necesita `local.properties` con `sdk.dir` o la variable de entorno `ANDROID_SDK_ROOT`, además de un dispositivo conectado o un emulador en ejecución.
 
-Note: `gradle.properties` sets the Gradle log level to `quiet`, so the console shows very little output when a build succeeds.
+Nota: `gradle.properties` pone el nivel de log de Gradle en `quiet`, así que la consola muestra muy poca información cuando la compilación sale bien.
 
-### Running on a physical phone
+### Ejecutar en un celular físico
 
-To install and run the game on a physical Android phone, enable these options first:
+Para instalar y ejecutar el juego en un celular Android físico, primero hay que activar estas opciones:
 
-1. **Developer options:** go to **Settings > About phone** and tap **Build number** (on Xiaomi: **OS version**) seven times.
-2. **USB debugging:** in **Settings > Developer options**, turn on **USB debugging**.
-3. **Authorize the computer:** connect the phone by USB and accept the **"Allow USB debugging?"** prompt on the phone.
-4. **Install via USB (Xiaomi / HyperOS / MIUI only):** in **Developer options**, turn on **Install via USB**. Without it, the phone blocks the installation from Android Studio.
+1. **Opciones de desarrollador:** ir a **Ajustes > Acerca del teléfono** y tocar siete veces **Número de compilación** (en Xiaomi: **Versión del SO**).
+2. **Depuración USB:** en **Ajustes > Opciones de desarrollador**, activar **Depuración USB**.
+3. **Autorizar la computadora:** conectar el celular por USB y aceptar el aviso **"¿Permitir la depuración USB?"** en el teléfono.
+4. **Instalar vía USB (solo Xiaomi / HyperOS / MIUI):** en **Opciones de desarrollador**, activar **Instalar vía USB**. Sin esto, el teléfono bloquea la instalación desde Android Studio.
 
-After that, the phone appears in the device selector of Android Studio.
+Después de esto, el celular aparece en el selector de dispositivos de Android Studio.
 
-## Troubleshooting
+## Solución de problemas
 
-No errors or complications were found during the first run of the project. The Gradle Sync and the build completed without changes to the code or configuration.
+No se encontraron errores ni complicaciones durante la primera ejecución del proyecto. El Gradle Sync y la compilación terminaron sin cambios en el código ni en la configuración.
 
-| Problem | Cause | Solution |
+| Problema | Causa | Solución |
 |---|---|---|
-| No issues found on first run | Not applicable | Not applicable |
+| Ningún problema en la primera ejecución | No aplica | No aplica |
 
-## Useful Gradle tasks
+## Tareas útiles de Gradle
 
-Run them with `gradlew.bat` (Windows) or `./gradlew` (macOS/Linux):
+Se ejecutan con `gradlew.bat` (Windows) o `./gradlew` (macOS/Linux):
 
-- `android:installDebug`: builds the debug APK and installs it on the connected device.
-- `android:lint`: performs Android project validation.
-- `build`: builds sources and archives of every project.
-- `clean`: removes `build` folders, which store compiled classes and built archives.
-- `test`: runs unit tests (if any).
-- `--offline`: uses cached dependency archives.
-- `--refresh-dependencies`: forces validation of all dependencies.
+- `android:installDebug`: compila el APK de depuración y lo instala en el dispositivo conectado.
+- `android:lint`: valida el proyecto de Android.
+- `build`: compila el código y los archivos de todos los módulos.
+- `clean`: borra las carpetas `build`, que guardan clases compiladas y archivos generados.
+- `test`: ejecuta las pruebas unitarias (si las hay).
+- `--offline`: usa las dependencias guardadas en caché.
+- `--refresh-dependencies`: fuerza la validación de todas las dependencias.
 
-Most tasks can be limited to one module with the `name:` prefix. For example, `core:clean` removes the `build` folder only from the `core` project.
+La mayoría de las tareas se pueden limitar a un módulo con el prefijo `nombre:`. Por ejemplo, `core:clean` borra solo la carpeta `build` del módulo `core`.
 
-## License
+## Licencia
 
-MIT License. See [`LICENSE`](LICENSE) and [`docs/licencias.md`](docs/licencias.md) for third-party dependencies and resource provenance.
+Licencia MIT. Ver [`LICENSE`](LICENSE) y [`docs/licencias.md`](docs/licencias.md) para las dependencias de terceros y la procedencia de los recursos.
