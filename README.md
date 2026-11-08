@@ -21,6 +21,47 @@ EduTycoon es un videojuego de simulación económica y gestión escolar desarrol
 
 ---
 
+## 📸 Galería Visual de la Actualización (Entrega 2 - Mecánica Tycoon)
+
+A continuación se muestra la evidencia gráfica de la nueva funcionalidad implementada para la actualización de Google Play:
+
+### 1. Comparativa de Comportamiento: Antes vs. Después
+
+| Antes: Sin Burbujas (Generación Pasiva e Incierta) | Después: Burbujas Interactivas (Recaudación Táctil Tycoon) |
+| :---: | :---: |
+| ![Captura Antes de Burbujas](docs/evidencia/entrega-2/captura_antes_de_burbujas_interactivas.jpg) | ![Burbujas Interactivas Activas](docs/evidencia/entrega-2/burbujas_interactivas.jpg) |
+| <sub>**Antes:** Los edificios generaban saldo automáticamente sin retroalimentación visual ni aviso de tiempo.</sub> | <sub>**Después:** Burbujas doradas flotantes oscilan sobre cada plantel al completarse su ciclo de ingresos.</sub> |
+
+---
+
+### 2. Flujo Completo de la Nueva Mecánica en Juego
+
+#### A. Definición y Transparencia de Ciclos de Producción por Edificio
+Al pulsar sobre cualquier plantel escolar, la ficha de gestión (`BuildingInfoWindow`) ahora transparenta la duración del ciclo de ingresos y desglosa el tiempo restante en segundos, así como la ganancia que generará cada ciclo.
+
+| Definición de Tiempo por Ciclo | Tiempo de Ciclo de Ingresos Añadido |
+| :---: | :---: |
+| ![Definición de Tiempo por Ciclo](docs/evidencia/entrega-2/definicion_de_tiempo_por_ciclo_de_ingreso.jpg) | ![Tiempo de Ciclo de Ingresos Añadido](docs/evidencia/entrega-2/tiempo_de_ciclo_ingresos_anadido.jpg) |
+| <sub>Visualización de estadísticas base y duración configurada del ciclo (ej. 35s en Escuela de Computación).</sub> | <sub>Desglose en tiempo real del tiempo restante para el cobro o alerta de dinero listo para recolectar.</sub> |
+
+#### B. Generación y Notificación Emergente de Fondos
+Al finalizar el ciclo de producción, el edificio deja de estar en espera pasiva y despliega la burbuja interactiva con el indicador de saldo listo para cobro sobre el tejado del inmueble.
+
+<p align="center">
+  <img src="docs/evidencia/entrega-2/burbuja_dinero_emergente.jpg" width="600" alt="Burbuja de Dinero Emergente" /><br>
+  <sub><b>Burbuja emergente sobre el plantel:</b> Notificación gráfica que señala al jugador que los ingresos están listos para cobro manual.</sub>
+</p>
+
+#### C. Animación de Recolección Táctil y Actualización en el HUD
+Al pulsar la burbuja con el dedo, se dispara el tintineo de monedas (`coin.wav`), una animación de texto ascendente (`+$X`) que se desvanece suavemente hacia arriba, y el saldo en el HUD superior izquierdo se incrementa al instante.
+
+| Animación de Recolección al Tocar la Burbuja | Saldo del HUD Actualizado de Inmediato |
+| :---: | :---: |
+| ![Animación de Recolección](docs/evidencia/entrega-2/animacion_recoleccion_dinero.jpg) | ![Saldo Actualizado](docs/evidencia/entrega-2/saldo_actualizado_dinero_recolectado.jpg) |
+| <sub>Animación flotante del monto recaudado elevándose sobre el edificio con desvanecimiento alfa.</sub> | <sub>Reflejo inmediato del dinero recolectado en el saldo general del campus escolar.</sub> |
+
+---
+
 ## 👥 Instrucciones para Personas Probadoras (Testers)
 
 1. **Acceso al Programa de Prueba Cerrada:**

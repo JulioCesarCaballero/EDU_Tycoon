@@ -45,7 +45,7 @@ Conforme a la sección 1.2 del instrumento de evaluación, se presentan los tres
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | **#7** | `feature/purchase-balance-rule` | Closes #6 | Julio César Caballero | Manuel Alejandro Aragón | ✅ Exit 0 | Oct 2026 | Regla estricta de saldo en compras para evitar números rojos y deshabilitar botón cuando los fondos son insuficientes. |
 | **#12** | `feature/audio-toggle-pause-menu` | Closes #11 | Manuel Alejandro Aragón | Julio César Caballero | ✅ Exit 0 | Oct 2026 | Gestor centralizado de audio (`AudioManager`), música ambiental en bucle y botón reactivo con contraste visual en menú de pausa. |
-| **#15** | `feature/interactive-building-income` | Closes #15 | Manuel Alejandro Aragón | Julio César Caballero | ✅ Exit 0 | Nov 2026 | **Mejora funcional de la actualización en Google Play:** Sistema Tycoon de recolección de dinero con ciclos variables, burbujas flotantes interactivas, audio de caja registradora y popup animado. |
+| **#17** | `feature/interactive-building-income` | Closes #16 | Manuel Alejandro Aragón | Julio César Caballero | ✅ Exit 0 | Nov 2026 | **Mejora funcional de la actualización en Google Play:** Sistema Tycoon de recolección de dinero con ciclos variables, burbujas flotantes interactivas, audio de caja registradora y popup animado. |
 
 ---
 
@@ -70,6 +70,12 @@ Conforme a la sección 1.2 del instrumento de evaluación, se presentan los tres
 | **Interacción y Recaudación** | Pasiva: el jugador recibía dinero sin interactuar ni saber cuándo ocurría. | **Activa y táctil:** al completarse el ciclo, aparece una **burbuja flotante interactiva** sobre el edificio para recaudar el dinero manualmente al tocarla. |
 | **Retroalimentación Sensorial** | Notificación plana en negro en la parte inferior de la pantalla (`Toast`). | **Efecto de sonido de caja registradora (`coin.wav`)**, animación de oscilación y pulso en la burbuja, y texto ascendente con desvanecimiento (`+$X`). |
 | **Transparencia en Ficha** | Ficha informativa mostraba valores estáticos sin indicar duraciones. | `BuildingInfoWindow` desglosa el tiempo exacto del ciclo, el saldo generado y un aviso destacado cuando hay fondos listos para cobrar. |
+
+#### Evidencia Visual de la Transformación:
+
+| Antes: Sin Burbujas (v1.0.0) | Después: Burbujas Interactivas (v1.1.0) |
+| :---: | :---: |
+| <img src="evidencia/entrega-2/captura_antes_de_burbujas_interactivas.jpg" width="340" /><br><sub>Generación pasiva e incierta sin avisos visuales ni sonoros.</sub> | <img src="evidencia/entrega-2/burbujas_interactivas.jpg" width="340" /><br><sub>Burbujas doradas flotantes sobre los planteles con ciclo concluido.</sub> |
 
 ### 3.3 Fundamentación Psicológica y de Diseño de Juego (Game Design)
 La transformación de la recaudación pasiva a un bucle de recolección manual activo genera un impacto psicológico sustancial:
@@ -108,6 +114,13 @@ La matriz exhaustiva con los **6 casos de prueba reales** exigidos por la rúbri
 
 Las capturas y registros de prueba se organizan en el directorio oficial:
 📁 `docs/evidencia/entrega-2/`
+* `captura_antes_de_burbujas_interactivas.jpg` - Estado previo (v1.0.0) sin burbujas de recolección.
+* `burbujas_interactivas.jpg` - Estado posterior (v1.1.0) con burbujas interactivas en campus.
+* `burbuja_dinero_emergente.jpg` - Notificación emergente sobre el plantel escolar.
+* `animacion_recoleccion_dinero.jpg` - Animación ascendente al tocar la burbuja.
+* `saldo_actualizado_dinero_recolectado.jpg` - Presupuesto acreditado de inmediato en el HUD.
+* `definicion_de_tiempo_por_ciclo_de_ingreso.jpg` - Duración del ciclo en ficha técnica de gestión.
+* `tiempo_de_ciclo_ingresos_anadido.jpg` - Estado de producción en tiempo real en ficha de edificio.
 * `play-cerrada-v1.png` - Ficha de publicación de versión inicial en Play Console.
 * `play-actualizacion-v2.png` - Lanzamiento y notas de versión de la actualización en Play Console.
 * `scrum.png` - Tablero Kanban/Scrum en GitHub Projects con historial de tarjetas cerradas.
