@@ -67,4 +67,13 @@ class AudioManagerTest {
         AudioManager.iniciarMusicaAmbiental("Route 1 Morning Breeze.mp3")
         assertEquals("Route 1 Morning Breeze.mp3", AudioManager.pistaActual)
     }
+
+    @Test
+    fun `reproducirSonidoDinero maneja entornos headless sin fallos`() {
+        // En headless mode, AudioManager no debe lanzar excepciones al intentar reproducir
+        AudioManager.reproducirSonidoDinero()
+        AudioManager.setAudio(false)
+        AudioManager.reproducirSonidoDinero()
+        assertFalse(AudioManager.audioHabilitado)
+    }
 }

@@ -30,6 +30,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.Scaling
 import com.badlogic.gdx.scenes.scene2d.actions.Actions
+import io.moviles.IPN_Tycoon.engine.AudioManager
+import io.moviles.IPN_Tycoon.engine.BuildingIncomeManager
 import io.moviles.IPN_Tycoon.engine.DecisionEngine
 import io.moviles.IPN_Tycoon.engine.DecisionEvent
 import io.moviles.IPN_Tycoon.engine.EconomyEngine
@@ -227,6 +229,43 @@ class GameScreen(game: Main) : BaseScreen(game) {
         pixmap.fillCircle(32, 32, 30)
         Texture(pixmap).apply { setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear) }
     }
+
+    // ── Burbujas interactivas de ingresos (Tycoon) ────────────────────
+    private var bubbleAnimTimer = 0f
+    private val bubbleTexture: Texture by lazy {
+        try {
+            val file = "bubble_coin.png".toInternalFile()
+            if (file.exists()) {
+                Texture(file).apply {
+                    setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
+                }
+            } else {
+                crearTexturaBurbujaFallback()
+            }
+        } catch (_: Exception) {
+            crearTexturaBurbujaFallback()
+        }
+    }
+
+    private fun crearTexturaBurbujaFallback(): Texture {
+        val pixmap = Pixmap(128, 128, Pixmap.Format.RGBA8888)
+        pixmap.setColor(Color(0.85f, 0.7f, 0.1f, 1f))
+        pixmap.fillCircle(64, 64, 60)
+        pixmap.setColor(Color(1f, 0.85f, 0f, 1f))
+        pixmap.fillCircle(64, 64, 52)
+        val tex = Texture(pixmap)
+        pixmap.dispose()
+        return tex.apply { setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear) }
+    }
+
+    private data class FloatingRevenueEffect(
+        val text: String,
+        var worldX: Float,
+        var worldY: Float,
+        var life: Float = 0f,
+        val maxLife: Float = 1.3f
+    )
+    private val floatingEffects = mutableListOf<FloatingRevenueEffect>()
 
     // ── OPTIMIZACIÓN: Datos de renderizado pre-calculados ─────────────
     /**
@@ -436,6 +475,29 @@ class GameScreen(game: Main) : BaseScreen(game) {
                 currentInfoWindow?.remove()
                 currentInfoWindow = null
 
+                // 1. PRIORIDAD: Comprobar si se tocó alguna burbuja de ingresos interactiva
+                for (entry in renderEntries) {
+                    if (entry.propiedad.comprada && BuildingIncomeManager.tieneIngresoListo(entry.propiedad.id)) {
+                        val bubblePos = calcularPosicionBurbuja(entry)
+                        val touchRadius = 280f * camera.zoom.coerceAtMost(3.5f)
+                        val dist = Vector2.dst(worldTouch.x, worldTouch.y, bubblePos.x, bubblePos.y)
+                        if (dist <= touchRadius) {
+                            val recolectado = BuildingIncomeManager.recolectar(entry.propiedad.id)
+                            if (recolectado > 0L) {
+                                AudioManager.reproducirSonidoDinero()
+                                floatingEffects.add(FloatingRevenueEffect(
+                                    text = "+$${formatMoney(recolectado)}",
+                                    worldX = bubblePos.x,
+                                    worldY = bubblePos.y + 60f
+                                ))
+                                hudDirty = true
+                                Gdx.app.log("TYCOON", "Recaudados \$${recolectado} en ${entry.propiedad.nombre}")
+                                return true
+                            }
+                        }
+                    }
+                }
+
                 try {
                     val logicaLayer = m.layers["Logica_Clics"] ?: return false
                     logicaLayer.objects.filterIsInstance<RectangleMapObject>().forEach { obj ->
@@ -487,6 +549,29 @@ class GameScreen(game: Main) : BaseScreen(game) {
         renderEntries.find { it.propiedad.id == propId }?.let { entry ->
             entry.cachedTex = getBuildingTexture(entry.propiedad)
         }
+    }
+
+    /**
+     * Calcula la posición en el mundo de la burbuja interactiva de recaudación
+     * encima del edificio según su escala actual y offsets de LOD.
+     */
+    private fun calcularPosicionBurbuja(entry: RenderEntry): Vector2 {
+        val p = entry.propiedad
+        val zoom = camera.zoom
+        val useSmallScale = zoom > maxZoomForFullBuildings
+        var drawY = entry.bWorldY
+        var scale = 1f
+
+        if (useSmallScale) {
+            scale = 0.72f
+            smallBuildingYOffset[p.id]?.let { offset ->
+                drawY += offset * (zoom - maxZoomForFullBuildings) / 2f
+            }
+        }
+
+        val h = p.renderH * scale
+        val bubbleY = drawY + h * 0.90f
+        return Vector2(entry.bWorldX, bubbleY)
     }
 
     /**
@@ -735,6 +820,54 @@ class GameScreen(game: Main) : BaseScreen(game) {
                 r.batch.color = Color.WHITE
             }
 
+            // ====================== BURBUJAS DE RECAUDACIÓN TYCOON ======================
+            bubbleAnimTimer += delta
+            val bobOffset = MathUtils.sin(bubbleAnimTimer * 4.5f) * 20f
+            val bubblePulse = 1f + 0.08f * MathUtils.sin(bubbleAnimTimer * 5.5f)
+
+            for (entry in renderEntries) {
+                if (!entry.propiedad.comprada) continue
+                if (!BuildingIncomeManager.tieneIngresoListo(entry.propiedad.id)) continue
+
+                val bubblePos = calcularPosicionBurbuja(entry)
+                val baseSize = 360f * bubblePulse
+                val drawBX = bubblePos.x - baseSize / 2f
+                val drawBY = bubblePos.y + bobOffset - baseSize / 2f
+
+                // Dibujar burbuja circular interactiva
+                r.batch.color = Color.WHITE
+                r.batch.draw(bubbleTexture, drawBX, drawBY, baseSize, baseSize)
+
+                // Etiqueta flotante con el importe listo para recaudar
+                val monto = BuildingIncomeManager.obtenerGananciasListas(entry.propiedad.id)
+                val labelTexto = "+$${formatMoney(monto)}"
+                val layout = GlyphLayout(worldFont, labelTexto)
+
+                val labelX = bubblePos.x - layout.width / 2f
+                val labelY = drawBY - 12f
+                worldFont.color = Color.GREEN
+                worldFont.draw(r.batch, layout, labelX, labelY)
+            }
+
+            // ====================== EFECTOS FLOTANTES DE DINERO (POPUP ANIMADO) ======================
+            val iterator = floatingEffects.iterator()
+            while (iterator.hasNext()) {
+                val effect = iterator.next()
+                effect.life += delta
+                effect.worldY += 160f * delta
+
+                val progress = effect.life / effect.maxLife
+                if (progress >= 1f) {
+                    iterator.remove()
+                    continue
+                }
+
+                val alpha = (1f - progress).coerceIn(0f, 1f)
+                val layout = GlyphLayout(worldFont, effect.text)
+                worldFont.color = Color(1f, 0.85f, 0.1f, alpha)
+                worldFont.draw(r.batch, layout, effect.worldX - layout.width / 2f, effect.worldY)
+            }
+
         } catch (e: Exception) {
             Gdx.app.error("RENDER", "Error en renderizado de mundo: ${e.message}")
         }
@@ -749,9 +882,14 @@ class GameScreen(game: Main) : BaseScreen(game) {
         while (cycleTimer >= cycleDuration && decisionWindow == null) {
             cycleTimer -= cycleDuration
             cycleEngine.advanceCycle()
-            hudDirty = true   // El ciclo cambia dinero/alumnos → invalidar caché HUD
+            hudDirty = true   // El ciclo avanza semestre y eventos → invalidar caché HUD
             autoGuardado.alTerminarCiclo()
-            economyEngine.lastResult?.let { showCycleToast(it) }
+        }
+
+        // Actualizar ciclos independientes por edificio
+        val completados = BuildingIncomeManager.actualizar(delta)
+        if (completados.isNotEmpty()) {
+            hudDirty = true
         }
     }
 
@@ -814,6 +952,7 @@ class GameScreen(game: Main) : BaseScreen(game) {
         backgroundTexture.dispose()
         menuIconTexture.dispose()
         highlightTexture.dispose()
+        bubbleTexture.dispose()
         worldFont.dispose()
         labelBgTexture.dispose()
         buildingTextureCache.values.forEach { it?.dispose() }

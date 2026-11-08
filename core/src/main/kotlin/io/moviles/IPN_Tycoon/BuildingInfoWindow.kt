@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.kotcrab.vis.ui.widget.VisWindow
+import io.moviles.IPN_Tycoon.engine.BuildingIncomeManager
 import io.moviles.IPN_Tycoon.engine.ReglaDeCompra
 import io.moviles.IPN_Tycoon.engine.ResultadoCompra
 import ktx.actors.onChange
@@ -44,6 +45,10 @@ class BuildingInfoWindow(
 
             // ── Stats ─────────────────────────────────────────────────
             label("Capacidad: ${data.capacidad} alumnos"); row()
+            label("Ciclo de producción: ${data.tiempoCicloSegundos.toInt()}s") {
+                color = Color.YELLOW
+            }.cell(padBottom = 2f)
+            row()
 
             if (data.comprada) {
                 label("Nivel actual: ${data.nivel} / ${data.mejoraMax}") {
@@ -51,22 +56,36 @@ class BuildingInfoWindow(
                 }.cell(padBottom = 2f)
                 row()
 
-                val ingresoCiclo = data.baseAlumnos * data.nivel * 10L
-                label("Ingreso/ciclo: \$${fmt(ingresoCiclo)}") {
+                val ingresoCiclo = BuildingIncomeManager.calcularIngresoPorCiclo(data)
+                label("Ingreso por ciclo: \$${fmt(ingresoCiclo)}") {
                     color = Color.GREEN
                 }
                 row()
 
-                if (data.nivel < data.mejoraMax) {
-                    val ingresoSiguiente = data.baseAlumnos * (data.nivel + 1) * 10L
-                    label("Nivel ${data.nivel + 1}: \$${fmt(ingresoSiguiente)}/ciclo") {
+                if (BuildingIncomeManager.tieneIngresoListo(data.id)) {
+                    val listas = BuildingIncomeManager.obtenerGananciasListas(data.id)
+                    label("★ ¡\$${fmt(listas)} listos! Toca la burbuja en el mapa") {
+                        color = Color.GOLD
+                    }.cell(padTop = 2f, padBottom = 2f)
+                    row()
+                } else {
+                    val restante = BuildingIncomeManager.obtenerTiempoRestante(data).toInt()
+                    label("Próximo cobro en: ${restante}s") {
                         color = Color.LIGHT_GRAY
+                    }.cell(padBottom = 2f)
+                    row()
+                }
+
+                if (data.nivel < data.mejoraMax) {
+                    val ingresoSiguiente = BuildingIncomeManager.calcularIngresoPorCiclo(data, data.nivel + 1)
+                    label("Nivel ${data.nivel + 1}: \$${fmt(ingresoSiguiente)} cada ${data.tiempoCicloSegundos.toInt()}s") {
+                        color = Color.GRAY
                     }
                     row()
                 }
             } else {
-                val ingresoNivel1 = data.baseAlumnos * 1 * 10L
-                label("Ingreso al comprar: \$${fmt(ingresoNivel1)}/ciclo") {
+                val ingresoNivel1 = BuildingIncomeManager.calcularIngresoPorCiclo(data, 1)
+                label("Ingreso inicial: \$${fmt(ingresoNivel1)} cada ${data.tiempoCicloSegundos.toInt()}s") {
                     color = Color.GREEN
                 }
                 row()
