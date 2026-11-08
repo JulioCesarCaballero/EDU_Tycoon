@@ -22,7 +22,7 @@
 ## 1. Gestión Scrum y Tablero de Control
 
 * **URL del Tablero Scrum (GitHub Projects):**  
-  `https://github.com/users/JulioCesarCaballero/projects/1`
+  `https://github.com/users/JulioCesarCaballero/projects/5/views/1`
 * **Columnas obligatorias configuradas:**  
   1. `Backlog` (Historias de usuario y requerimientos futuros)
   2. `Por hacer` (Tareas asignadas al sprint actual)
@@ -44,7 +44,7 @@ Conforme a la sección 1.2 del instrumento de evaluación, se presentan los tres
 | PR # | Rama de Propósito | Issue Vinculada | Autor | Revisor / QA | Estado CI | Fecha Merge | Cambio Entregado / Impacto |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | **#7** | `feature/purchase-balance-rule` | Closes #6 | Julio César Caballero | Manuel Alejandro Aragón | ✅ Exit 0 | Oct 2026 | Regla estricta de saldo en compras para evitar números rojos y deshabilitar botón cuando los fondos son insuficientes. |
-| **#14** | `feature/audio-toggle-pause-menu` | Closes #11 | Manuel Alejandro Aragón | Julio César Caballero | ✅ Exit 0 | Oct 2026 | Gestor centralizado de audio (`AudioManager`), música ambiental en bucle y botón reactivo con contraste visual en menú de pausa. |
+| **#12** | `feature/audio-toggle-pause-menu` | Closes #11 | Manuel Alejandro Aragón | Julio César Caballero | ✅ Exit 0 | Oct 2026 | Gestor centralizado de audio (`AudioManager`), música ambiental en bucle y botón reactivo con contraste visual en menú de pausa. |
 | **#15** | `feature/interactive-building-income` | Closes #15 | Manuel Alejandro Aragón | Julio César Caballero | ✅ Exit 0 | Nov 2026 | **Mejora funcional de la actualización en Google Play:** Sistema Tycoon de recolección de dinero con ciclos variables, burbujas flotantes interactivas, audio de caja registradora y popup animado. |
 
 ---
