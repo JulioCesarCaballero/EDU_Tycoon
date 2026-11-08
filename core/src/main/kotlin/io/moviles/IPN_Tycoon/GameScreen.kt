@@ -26,10 +26,12 @@ import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Table
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.Scaling
 import com.badlogic.gdx.scenes.scene2d.actions.Actions
+import io.moviles.IPN_Tycoon.engine.CycleTimeController
 import io.moviles.IPN_Tycoon.engine.DecisionEngine
 import io.moviles.IPN_Tycoon.engine.DecisionEvent
 import io.moviles.IPN_Tycoon.engine.EconomyEngine
@@ -39,6 +41,7 @@ import io.moviles.IPN_Tycoon.engine.EventoEfecto
 import io.moviles.IPN_Tycoon.engine.GameCycleEngine
 import io.moviles.IPN_Tycoon.engine.GameEvent
 import io.moviles.IPN_Tycoon.engine.OpcionDecision
+import io.moviles.IPN_Tycoon.engine.VelocidadCiclo
 import ktx.actors.onChange
 import ktx.app.clearScreen
 import ktx.assets.toInternalFile
@@ -60,6 +63,7 @@ class GameScreen(game: Main) : BaseScreen(game) {
         if (!ok) Gdx.app.error("AUTOSAVE", "No se pudo guardar automáticamente")
     }
     private val cycleDuration     = 30f
+    private val cycleTimeController = CycleTimeController(cycleDuration)
 
     // ── Ajustes de Optimización ──────────────────────────────────────
     private val maxZoom                = 7.0f
@@ -204,18 +208,22 @@ class GameScreen(game: Main) : BaseScreen(game) {
     }
 
     // ── HUD ───────────────────────────────────────────────────────────
-    private var moneyLabel:       Label? = null
-    private var alumnosLabel:     Label? = null
-    private var reputationLabel:  Label? = null
-    private var lastMoney:        Long = -1
-    private var lastStudents:     Int = -1
-    private var lastReputation:   Int = -1
-    private var toastLine1:       Label? = null
-    private var toastLine2:       Label? = null
-    private var toastTable:       Table? = null
-    private var eventTituloLabel: Label? = null
-    private var eventEfectoLabel: Label? = null
-    private var eventTable:       Table? = null
+    private var moneyLabel:         Label? = null
+    private var alumnosLabel:       Label? = null
+    private var reputationLabel:    Label? = null
+    private var cycleTimerLabel:    Label? = null
+    private var cycleProgressFill:  Image? = null
+    private var speedButton:        TextButton? = null
+    private val cycleBarMaxWidth:   Float = 110f
+    private var lastMoney:          Long = -1
+    private var lastStudents:       Int = -1
+    private var lastReputation:     Int = -1
+    private var toastLine1:         Label? = null
+    private var toastLine2:         Label? = null
+    private var toastTable:         Table? = null
+    private var eventTituloLabel:   Label? = null
+    private var eventEfectoLabel:   Label? = null
+    private var eventTable:         Table? = null
 
     // ── Estado ────────────────────────────────────────────────────────
     var modoCarga: Boolean = false
@@ -313,7 +321,7 @@ class GameScreen(game: Main) : BaseScreen(game) {
 
         if (backgroundImage == null) {
             backgroundImage = Image(backgroundTexture).apply {
-                setScaling(Scaling.fit)
+                setScaling(Scaling.fill)
                 setAlign(Align.center)
             }
             backgroundImage?.setFillParent(true)
@@ -408,6 +416,7 @@ class GameScreen(game: Main) : BaseScreen(game) {
         lastStudents   = -1
         lastReputation = -1
         cycleTimer     = 0f
+        cycleTimeController.reiniciar()
         hudDirty       = true
 
         // stage.clear() ya quitó la ventana; una decisión sin responder se descarta
@@ -608,12 +617,51 @@ class GameScreen(game: Main) : BaseScreen(game) {
                 background = whiteDrawable
                 pad(8f)
                 add(Label("$ ", goldStyle))
-                add(moneyLabel).padRight(20f)
+                add(moneyLabel).padRight(16f)
                 add(Label("Alumnos: ", cyanStyle))
-                add(alumnosLabel).padRight(20f)
-                add(Label("Reputación: ", goldStyle)).padRight(5f)
+                add(alumnosLabel).padRight(16f)
+                add(Label("Reputación: ", goldStyle)).padRight(4f)
                 reputationLabel = Label("0%", goldStyle).apply { setFontScale(1.1f) }
-                add(reputationLabel)
+                add(reputationLabel).padRight(18f)
+
+                // ── Barra de progreso del ciclo escolar + Control de velocidad ──
+                val cycleInfoTable = Table().apply {
+                    cycleTimerLabel = Label("Ciclo: 30s", Label.LabelStyle(font, Color.LIGHT_GRAY)).apply {
+                        setFontScale(0.9f)
+                    }
+                    add(cycleTimerLabel).left().padBottom(3f).row()
+
+                    val barTrack = Table().apply {
+                        background = skin.newDrawable("white", Color(0.18f, 0.18f, 0.24f, 0.95f))
+                        val barGroup = com.badlogic.gdx.scenes.scene2d.Group().apply {
+                            setSize(cycleBarMaxWidth, 8f)
+                        }
+                        val fillImg = Image(skin.newDrawable("white", Color.WHITE)).apply {
+                            color = Color.CYAN
+                            setBounds(0f, 0f, 0f, 8f)
+                        }
+                        cycleProgressFill = fillImg
+                        barGroup.addActor(fillImg)
+                        add(barGroup).width(cycleBarMaxWidth).height(8f)
+                    }
+                    add(barTrack).width(cycleBarMaxWidth).height(8f).left()
+                }
+                add(cycleInfoTable).padRight(10f)
+
+                val btnSpeed = TextButton("1x", skin).apply {
+                    color = Color.GREEN
+                    onChange {
+                        val nuevaVel = cycleTimeController.alternarVelocidad()
+                        setText(nuevaVel.etiqueta)
+                        color = when (nuevaVel) {
+                            VelocidadCiclo.NORMAL -> Color.GREEN
+                            VelocidadCiclo.RAPIDO -> Color.CYAN
+                            VelocidadCiclo.PAUSA  -> Color.ORANGE
+                        }
+                    }
+                }
+                speedButton = btnSpeed
+                add(btnSpeed).width(68f).height(34f)
             }).left().expandX().pad(10f)
 
             add(scene2d.image(menuIconTexture) {
@@ -743,11 +791,11 @@ class GameScreen(game: Main) : BaseScreen(game) {
     }
 
     private fun actualizarCicloDeJuego(delta: Float) {
-        // Juego en pausa mientras haya una decisión sin responder
-        if (decisionWindow != null) return
-        cycleTimer += delta
-        while (cycleTimer >= cycleDuration && decisionWindow == null) {
-            cycleTimer -= cycleDuration
+        // Juego en pausa mientras haya una decisión sin responder o el reloj esté en PAUSA
+        val ciclosCompletados = cycleTimeController.avanzar(delta, bloqueado = decisionWindow != null)
+        cycleTimer = cycleTimeController.tiempoTranscurrido
+        repeat(ciclosCompletados) {
+            if (decisionWindow != null) return@repeat
             cycleEngine.advanceCycle()
             hudDirty = true   // El ciclo cambia dinero/alumnos → invalidar caché HUD
             autoGuardado.alTerminarCiclo()
@@ -786,6 +834,22 @@ class GameScreen(game: Main) : BaseScreen(game) {
                 else             -> Color.WHITE
             }
         }
+
+        // Actualizar barra y etiqueta del ciclo escolar en tiempo real
+        val segRestantes = cycleTimeController.segundosRestantes()
+        val numCiclo = GameState.ciclosJugados + 1
+        cycleTimerLabel?.setText(
+            if (cycleTimeController.estaPausado) "Ciclo #$numCiclo (PAUSA)"
+            else "Ciclo #$numCiclo (${segRestantes}s)"
+        )
+        cycleProgressFill?.let { fill ->
+            fill.width = cycleBarMaxWidth * cycleTimeController.progreso()
+            fill.color = when (cycleTimeController.velocidadActual) {
+                VelocidadCiclo.PAUSA  -> Color.ORANGE
+                VelocidadCiclo.RAPIDO -> Color.GOLD
+                VelocidadCiclo.NORMAL -> Color.CYAN
+            }
+        }
     }
 
     // ── Ciclo de vida: guardar al pausar la app o salir de la partida ─
@@ -804,6 +868,7 @@ class GameScreen(game: Main) : BaseScreen(game) {
     // ── Resize / Dispose ──────────────────────────────────────────────
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
+        dialogoActor?.setSize(stage.width, stage.height)
         camera.viewportWidth  = width.toFloat()
         camera.viewportHeight = height.toFloat()
         camera.update()
