@@ -49,6 +49,11 @@ class GameScreen(game: Main) : BaseScreen(game) {
     private val estudiantesEngine = EstudiantesEngine()
     private val eventEngine       = EventEngine { evento -> showEventToast(evento) }
     private var cycleTimer        = 0f
+
+    // ── Guardado automático (cada ciclo, al pausar y al salir) ───────
+    private val autoGuardado = AutoGuardado(game.saveManager) { ok ->
+        if (!ok) Gdx.app.error("AUTOSAVE", "No se pudo guardar automáticamente")
+    }
     private val cycleDuration     = 30f
 
     // ── Ajustes de Optimización ──────────────────────────────────────
@@ -731,6 +736,7 @@ class GameScreen(game: Main) : BaseScreen(game) {
             cycleTimer -= cycleDuration
             cycleEngine.advanceCycle()
             hudDirty = true   // El ciclo cambia dinero/alumnos → invalidar caché HUD
+            autoGuardado.alTerminarCiclo()
             economyEngine.lastResult?.let { showCycleToast(it) }
         }
     }
@@ -765,6 +771,19 @@ class GameScreen(game: Main) : BaseScreen(game) {
                 else             -> Color.WHITE
             }
         }
+    }
+
+    // ── Ciclo de vida: guardar al pausar la app o salir de la partida ─
+    /** La app pasa a segundo plano (botón Home, llamada, cambiar de app). */
+    override fun pause() {
+        super.pause()
+        if (modoCarga) autoGuardado.guardarAhora()
+    }
+
+    /** Se sale de la partida (menú principal o botón Atrás). */
+    override fun hide() {
+        super.hide()
+        if (modoCarga) autoGuardado.guardarAhora()
     }
 
     // ── Resize / Dispose ──────────────────────────────────────────────
