@@ -40,5 +40,6 @@ object GameState {
         ciclosJugados  = 0
         dinero         = presupuestoInicial
         alumnosTotales = 0
+        io.moviles.IPN_Tycoon.engine.BuildingIncomeManager.reiniciar()
     }
 }
