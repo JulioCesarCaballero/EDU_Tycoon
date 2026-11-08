@@ -58,5 +58,6 @@ object GameState {
         dinero         = presupuestoInicial
         alumnosTotales = 0
         reputacionBonus = 0
+        io.moviles.IPN_Tycoon.engine.BuildingIncomeManager.reiniciar()
     }
 }

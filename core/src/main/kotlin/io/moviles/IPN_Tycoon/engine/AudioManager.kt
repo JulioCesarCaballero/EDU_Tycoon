@@ -2,14 +2,15 @@ package io.moviles.IPN_Tycoon.engine
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.Music
+import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.graphics.Color
 import io.moviles.IPN_Tycoon.GameState
 import ktx.assets.toInternalFile
 
 /**
  * Gestor centralizado del subsistema de audio para EduTycoon.
- * Controla la reproducción de música ambiental en bucle, el silenciamiento,
- * el volumen maestro y la retroalimentación visual en la interfaz de usuario.
+ * Controla la reproducción de música ambiental en bucle, efectos de sonido (dinero/recaudación),
+ * el silenciamiento, el volumen maestro y la retroalimentación visual en la interfaz de usuario.
  */
 object AudioManager {
 
@@ -18,6 +19,7 @@ object AudioManager {
     const val VOLUMEN_SILENCIADO: Float = 0.0f
 
     private var musicaFondo: Music? = null
+    private var sonidoDinero: Sound? = null
     var pistaActual: String = "Route 1 Morning Breeze.mp3"
         private set
 
@@ -122,13 +124,36 @@ object AudioManager {
         if (audioHabilitado) Color.GREEN else Color.CORAL
 
     /**
-     * Libera los recursos de música al cerrar la aplicación.
+     * Reproduce el efecto de sonido de recaudación de fondos / caja registradora ("coin.wav").
+     * Respeta el estado de audio maestro y cuenta con protección ante entornos headless.
+     */
+    fun reproducirSonidoDinero() {
+        try {
+            if (!audioHabilitado || volumenMaster <= 0f) return
+            if (Gdx.audio == null || Gdx.files == null) return
+
+            if (sonidoDinero == null) {
+                val archivo = "coin.wav".toInternalFile()
+                if (archivo.exists()) {
+                    sonidoDinero = Gdx.audio.newSound(archivo)
+                }
+            }
+            sonidoDinero?.play(volumenMaster.coerceAtLeast(0.6f))
+        } catch (e: Exception) {
+            Gdx.app?.log("AudioManager", "No se pudo reproducir el sonido de recaudación: ${e.message}")
+        }
+    }
+
+    /**
+     * Libera los recursos de música y efectos al cerrar la aplicación.
      */
     fun dispose() {
         try {
             musicaFondo?.stop()
             musicaFondo?.dispose()
             musicaFondo = null
+            sonidoDinero?.dispose()
+            sonidoDinero = null
         } catch (_: Exception) {}
     }
 }
